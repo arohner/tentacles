@@ -71,10 +71,12 @@
                {:headers {"Authorization" (str "token " (query "oauth_token"))}}))]
     (safe-parse
      (http/request
-      (let [proper-query (dissoc query "auth" "oauth_token")]
-        (if (#{:post :put :delete} method)
-          (assoc req :body (json/generate-string (or (proper-query "raw") proper-query)))
-          (assoc req :query-params proper-query)))))))
+      (let [proper-query (dissoc query "auth" "oauth_token")
+            req (if (#{:post :put :delete} method)
+              (assoc req :body (json/generate-string (or (proper-query "raw") proper-query)))
+              (assoc req :query-params proper-query))
+            req (assoc req :insecure? true)]
+        req)))))
 
 ;; Functions will call this to create API calls.
 (defn api-call [method end-point positional query]
